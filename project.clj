@@ -1,14 +1,69 @@
-;; LWJGL version
+(require 'clojure.set)
+
+;; Desired LWJGL version.
 (def lwjgl-version "3.3.0-SNAPSHOT")
 
-;; TODO: consider just maintaining a matrix of module to available natives?
-;; Throw a warning during build that the JAR might not run on certain platforms?
+;; Union of all platforms supported by the LWJGL project.
+(def lwjgl-all-platforms
+  #{"linux"
+    "linux-arm32"
+    "linux-arm64"
+    "macos"
+    "macos-arm64"
+    "windows"
+    "windows-x86"
+    "windows-arm64"})
+
+;; Mapping of LWJGL modules to their available platform natives.
+;; Note that some modules don't require natives at all while others
+;; only require natives on specific platforms (lwjgl-vulkan, for example).
+(def lwjgl-module-platform-natives
+  {"lwjgl" lwjgl-all-platforms
+   "lwjgl-assimp" lwjgl-all-platforms
+   "lwjgl-bgfx" (disj lwjgl-all-platforms "windows-arm64")
+   "lwjgl-cuda" #{}
+   "lwjgl-driftfx" lwjgl-all-platforms
+   "lwjgl-egl" #{}
+   "lwjgl-glfw" lwjgl-all-platforms
+   "lwjgl-jawt" #{}
+   "lwjgl-jemalloc" lwjgl-all-platforms
+   "lwjgl-libdivide" lwjgl-all-platforms
+   "lwjgl-llvm" lwjgl-all-platforms
+   "lwjgl-lmdb" lwjgl-all-platforms
+   "lwjgl-lz4" lwjgl-all-platforms
+   "lwjgl-meow" (disj lwjgl-all-platforms "linux-arm32")
+   "lwjgl-meshoptimizer" lwjgl-all-platforms
+   "lwjgl-nanovg" lwjgl-all-platforms
+   "lwjgl-nfd" lwjgl-all-platforms
+   "lwjgl-nuklear" lwjgl-all-platforms
+   "lwjgl-odbc" #{}
+   "lwjgl-openal" lwjgl-all-platforms
+   "lwjgl-opencl" #{}
+   "lwjgl-opengl" lwjgl-all-platforms
+   "lwjgl-opengles" lwjgl-all-platforms
+   "lwjgl-openvr" #{"linux" "macos" "windows" "windows-x86"}
+   "lwjgl-opus" lwjgl-all-platforms
+   "lwjgl-ovr" #{"windows" "windows-x86"}
+   "lwjgl-par" lwjgl-all-platforms
+   "lwjgl-remotery" lwjgl-all-platforms
+   "lwjgl-shaderc" lwjgl-all-platforms
+   "lwjgl-spvc" lwjgl-all-platforms
+   "lwjgl-sse" #{"linux" "macos" "windows" "windows-x86"}
+   "lwjgl-stb" lwjgl-all-platforms
+   "lwjgl-tinyexr" lwjgl-all-platforms
+   "lwjgl-tinyfd" lwjgl-all-platforms
+   "lwjgl-tootle" #{"linux" "macos" "windows" "windows-x86"}
+   "lwjgl-vma" lwjgl-all-platforms
+   "lwjgl-vulkan" #{"macos" "macos-arm64"}  ; only requires natives on macOS
+   "lwjgl-xxhash" lwjgl-all-platforms
+   "lwjgl-yoga" lwjgl-all-platforms
+   "lwjgl-zstd" lwjgl-all-platforms})
 
 ;; Everything
-#_(def lwjgl-modules
+(def lwjgl-modules-everything
   ["lwjgl"
    "lwjgl-assimp"
-;   "lwjgl-bgfx"  ; no natives for: windows-arm64
+   "lwjgl-bgfx"
    "lwjgl-cuda"
    "lwjgl-driftfx"
    "lwjgl-egl"
@@ -19,7 +74,7 @@
    "lwjgl-llvm"
    "lwjgl-lmdb"
    "lwjgl-lz4"
-;   "lwjgl-meow"  ; no natives for: linux-arm32
+   "lwjgl-meow"
    "lwjgl-meshoptimizer"
    "lwjgl-nanovg"
    "lwjgl-nfd"
@@ -29,19 +84,19 @@
    "lwjgl-opencl"
    "lwjgl-opengl"
    "lwjgl-opengles"
-;   "lwjgl-openvr"  ; no natives for: linux-arm32, linux-arm64, macos-arm64, windows-arm64
+   "lwjgl-openvr"
    "lwjgl-opus"
-;   "lwjgl-ovr"  ; no natives for: linux, linux-arm32, linux-arm64, macos, macos-arm64, windows-arm64
+   "lwjgl-ovr"
    "lwjgl-par"
    "lwjgl-remotery"
    "lwjgl-rpmalloc"
    "lwjgl-shaderc"
    "lwjgl-spvc"
-;   "lwjgl-sse"  ; no natives for: linux-arm32, linux-arm64, macos-arm64, windows-arm64
+   "lwjgl-sse"
    "lwjgl-stb"
    "lwjgl-tinyexr"
    "lwjgl-tinyfd"
-;   "lwjgl-tootle"  ; no natives for: linux-arm32, linux-arm64, macos-arm64, windows-arm64
+   "lwjgl-tootle"
    "lwjgl-vma"
    "lwjgl-vulkan"
    "lwjgl-xxhash"
@@ -49,10 +104,10 @@
    "lwjgl-zstd"])
 
 ;; Getting Started
-#_(def lwjgl-modules
+(def lwjgl-modules-getting-started
   ["lwjgl"
    "lwjgl-assimp"
-;   "lwjgl-bgfx"  ; no natives for: windows-arm64
+   "lwjgl-bgfx"
    "lwjgl-glfw"
    "lwjgl-nanovg"
    "lwjgl-nuklear"
@@ -63,7 +118,7 @@
    "lwjgl-vulkan"])
 
 ;; Minimal OpenGL
-(def lwjgl-modules
+(def lwjgl-modules-minimal-opengl
   ["lwjgl"
    "lwjgl-assimp"
    "lwjgl-glfw"
@@ -72,7 +127,7 @@
    "lwjgl-stb"])
 
 ;; Minimal OpenGL ES
-#_(def lwjgl-modules
+(def lwjgl-modules-minimal-opengles
   ["lwjgl"
    "lwjgl-assimp"
    "lwjgl-egl"
@@ -82,7 +137,7 @@
    "lwjgl-stb"])
 
 ;; Minimal Vulkan
-#_(def lwjgl-modules
+(def lwjgl-modules-minimal-vulkan
   ["lwjgl"
    "lwjgl-assimp"
    "lwjgl-glfw"
@@ -90,53 +145,43 @@
    "lwjgl-stb"
    "lwjgl-vulkan"])
 
-;; Targeted platforms / architectures
-(def lwjgl-platforms
-  ["linux"
-   "linux-arm32"
-   "linux-arm64"
-   "macos"
-   "macos-arm64"
-   "windows"
-   "windows-x86"
-   "windows-arm64"])
+;; Choose which set of LWJGL modules to use (can be a custom set).
+(def lwjgl-modules lwjgl-modules-minimal-opengl)
 
-;; Modules without native packages
-(def lwjgl-no-natives
-  #{"lwjgl-cuda"
-    "lwjgl-egl"
-    "lwjgl-jawt"
-    "lwjgl-odbc"
-    "lwjgl-opencl"
-    "lwjgl-vulkan"})
+;; Choose which platforms to target (can be a custom set).
+(def lwjgl-platforms lwjgl-all-platforms)
 
-;; Module lwjgl-vulkan has natives but only on macOS (macos and macos-arm64).
-(defn has-natives? [module platform]
-  (or (not (contains? lwjgl-no-natives module))
-      (and (= module "lwjgl-vulkan")
-           (some #(= platform %) ["macos" "macos-arm64"]))))
+;; Check if a module is supported (considering natives) on a given platform.
+(defn platform-supported? [module platform]
+  (let [natives (lwjgl-module-platform-natives module)]
+    (cond
+      (empty? natives) true
+      (= module "lwjgl-vulkan") true
+      (contains? natives platform) true
+      :else false)))
 
-;; Get the native package names for a given LWJGL module.
-(defn get-natives [module]
-  (reduce
-   (fn [natives platform]
-     (if (has-natives? module platform)
-       (conj natives (str "natives-" platform))
-       natives))
-   []
-   lwjgl-platforms))
+;; Check if a module has natives for a given platform.
+(defn platform-has-natives? [module platform]
+  (contains? (lwjgl-module-platform-natives module) platform))
 
 ;; Get all dependencies for a given module (including natives).
 (defn get-dependencies [module]
   (let [lwjgl-ns "org.lwjgl"
-        primary [(symbol lwjgl-ns module) lwjgl-version]
-        natives (get-natives module)]
+        primary [(symbol lwjgl-ns module) lwjgl-version]]
     (reduce
-     (fn [dependencies native]
-       (let [dependency (concat primary [:classifier native])]
-         (conj dependencies dependency)))
+     (fn [dependencies platform]
+       (if (platform-supported? module platform)
+         (if (platform-has-natives? module platform)
+           (let [classifier (str "natives-" platform)
+                 dependency (concat primary [:classifier classifier])]
+             (conj dependencies dependency))
+           dependencies)
+         (do
+           (printf "WARN: module %s might not work on %s\n" module platform)
+           (flush)
+           dependencies)))
      [primary]
-     natives)))
+     lwjgl-platforms)))
 
 ;; Get the LWJGL dependencies for the chosen modules.
 (defn lwjgl-dependencies []
@@ -147,19 +192,6 @@
   (into  ; add non-LWJGL dependencies here
    '[[org.clojure/clojure "1.10.1"]]
    (lwjgl-dependencies)))
-
-(comment
-  (lwjgl-dependencies)
-  (all-dependencies)
-
-  (has-natives? "lwjgl-vulkan" "macos-arm64")
-  (has-natives? "lwjgl-vulkan" "windows")
-  (has-natives? "lwjgl-glfw" "windows")
-  (get-natives "lwjgl-vulkan")
-  (get-natives "lwjgl-glfw")
-  (get-dependencies "lwjgl-vulkan")
-
-  .)
 
 ;; https://www.eclipse.org/swt/faq.php#swtawtosxmore
 (def jvm-opts
