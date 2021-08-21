@@ -165,6 +165,7 @@
   (contains? (lwjgl-module-platform-natives module) platform))
 
 ;; Get all dependencies for a given module (including natives).
+;; TODO: can this be made any clearer / cleaner?
 (defn get-dependencies [module]
   (let [lwjgl-ns "org.lwjgl"
         primary [(symbol lwjgl-ns module) lwjgl-version]]
@@ -190,7 +191,9 @@
 ;; Get all project dependencies (LWJGL + others)
 (defn all-dependencies []
   (into  ; add non-LWJGL dependencies here
-   '[[org.clojure/clojure "1.10.1"]]
+   '[[org.clojure/clojure "1.10.1"]
+     [cider/cider-nrepl "0.26.0"]
+     [nrepl "0.8.3"]]
    (lwjgl-dependencies)))
 
 ;; https://www.eclipse.org/swt/faq.php#swtawtosxmore
