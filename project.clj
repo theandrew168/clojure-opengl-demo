@@ -210,5 +210,7 @@
   :jvm-opts ~(jvm-opts (System/getProperty "os.name"))
   :main ^:skip-aot clojure-opengl-demo.core
   :target-path "target/%s"
-  :profiles {:uberjar {:aot :all
+  :profiles {:uberjar {:main clojure-opengl-demo.core
+                       :aot [clojure-opengl-demo.core]
+                       :uberjar-name "clojure-opengl-demo.jar"
                        :jvm-opts ["-Dclojure.compiler.direct-linking=true"]}})
