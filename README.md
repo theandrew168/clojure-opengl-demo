@@ -12,3 +12,14 @@ We need the extra Leiningen var here since `macos-arm64` natives aren't in LWJGL
 ```
 LEIN_SNAPSHOTS_IN_RELEASE=true lein uberjar
 ```
+
+## Platform Support
+The JAR built by the above command _should_ run (assuming Java is installed) on:
+* Linux x64
+* Linux arm64
+* Linux arm32
+* macOS x64
+* macOS arm64
+* Windows x64
+* Windows x86
+* Windows arm64
